@@ -40,6 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
     try {
       final plants = await _plantsService.getPlants();
+      if (!mounted) return;
       setState(() {
         _plants = plants;
         if (_selectedPlantId == null && plants.isNotEmpty) {
@@ -48,11 +49,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         _loading = false;
       });
     } on ApiException catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.message;
         _loading = false;
       });
     } catch (_) {
+      if (!mounted) return;
       setState(() {
         _error = 'No se pudieron cargar los datos de inicio.';
         _loading = false;
