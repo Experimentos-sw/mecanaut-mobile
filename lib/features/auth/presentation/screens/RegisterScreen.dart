@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mecanaut_mobile/core/di/AppProviders.dart';
@@ -322,14 +323,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           setState(() => _acceptTerms = value ?? false);
                         },
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Text.rich(
                           TextSpan(
                             text: 'He leido y acepto los ',
                             children: <TextSpan>[
                               TextSpan(
                                 text: 'Terminos y Condiciones',
-                                style: TextStyle(color: Color(0xFF5B62B3)),
+                                style: const TextStyle(color: Color(0xFF5B62B3)),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    _showTermsDialog(context);
+                                  },
                               ),
                             ],
                           ),
@@ -374,6 +379,83 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  void _showTermsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            'Términos y Condiciones',
+            style: TextStyle(color: Color(0xFF1F56A0), fontWeight: FontWeight.bold),
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _sectionTitle('1. Definición del Servicio'),
+                  _contentBody(
+                      'Mecanaut es una solución de software como servicio (SaaS) que permite la gestión de activos, planificación de mantenimiento preventivo/correctivo y análisis de KPIs industriales. \nEl servicio se presta a través de una aplicación web y herramientas de visualización de datos.'),
+
+                  _sectionTitle('2. Planes de Suscripción y Pago'),
+                  _contentBody(
+                      '• Plan Gratuito: Hasta 10 activos y 1 perfil de administrador.\n'
+                          '• Plan Profesional: Hasta 50 activos y 5 administradores, incluyendo mantenimiento preventivo.\n'
+                          '• Plan Enterprise: Activos y usuarios ilimitados con personalización avanzada.\n'
+                          '• Facturación: Los pagos se realizan de forma mensual o anual según lo contratado.'),
+
+                  _sectionTitle('3. Responsabilidades del Usuario'),
+                  _contentBody(
+                      '• Administradores: Son responsables de la veracidad de los datos de maquinaria e inventario.\n'
+                          '• Técnicos: Responsables del registro preciso de evidencias y cierre de órdenes de trabajo.\n'
+                          '• Seguridad: El usuario es responsable de la confidencialidad de sus credenciales.'),
+
+                  _sectionTitle('4. Propiedad Intelectual y Datos'),
+                  _contentBody(
+                      '• Propiedad del Software: AwawaTech conserva todos los derechos sobre el código fuente y diseño.\n'
+                          '• Datos del Cliente: Los datos pertenecen al cliente, pero Mecanaut tiene permiso para procesarlos para generar indicadores (MTTR, MTBF).'),
+
+                  _sectionTitle('5. Disponibilidad y Soporte (SLA)'),
+                  _contentBody(
+                      'Mecanaut se compromete a mantener la plataforma operativa para garantizar la continuidad de las líneas de producción y brindará asesoría en la implementación.'),
+
+                  _sectionTitle('6. Limitación de Responsabilidad'),
+                  _contentBody(
+                      'Mecanaut ayuda a optimizar procesos, pero no se hace responsable por fallas mecánicas directas o paradas de planta derivadas de una mala programación manual del cliente.'),
+
+                  _sectionTitle('7. Terminación del Servicio'),
+                  _contentBody(
+                      'El cliente puede cancelar su suscripción en cualquier momento. Tendrá un periodo de 30 días para exportar su historial antes de la eliminación de datos.'),
+
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cerrar', style: TextStyle(color: Color(0xFF5B62B3))),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1F56A0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () {
+                setState(() => _acceptTerms = true);
+                Navigator.pop(context);
+              },
+              child: const Text('Aceptar y Continuar', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _onSubmit() async {
     if (!_acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -410,6 +492,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
       context.go('/login');
     }
+  }
+
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF1F56A0),
+        ),
+      ),
+    );
+  }
+
+  Widget _contentBody(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 14,
+        color: Color(0xFF3D3D3D),
+        height: 1.5,
+      ),
+    );
   }
 
   Widget _sectionCard({
